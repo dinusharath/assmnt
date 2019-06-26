@@ -9,7 +9,6 @@ import core.ClientInfo;
 import core.Quotation;
 import registry.ServiceRegistry;
 import vetting.LocalVettingService;
-import vetting.VettingService;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,48 +19,37 @@ import java.util.List;
  * @author Rem
  */
 public class LocalBrokerService extends AbstractActor {
-//    VettingService vettingService = (VettingService) ServiceRegistry.lookups("vs-VettingService");
-    List<Quotation> quotations;
-    ActorSystem system;
     ActorRef client;
-    int clientSequence;
+    ActorSystem system;
+    ClientInfo info;
     final ActorRef serviceReg;
     final ActorRef localvetservice;
-    ClientInfo info;
+    int clientSequence;
+    List<Quotation> quotations;
 
     public LocalBrokerService() {
-         system = ActorSystem.create("ContentSystem");
+        system = ActorSystem.create("ContentSystem");
         quotations = new LinkedList<Quotation>();
-        serviceReg =
-                system.actorOf(
-                        Props.create(ServiceRegistry.class),
-                        "serviceReg");
-        localvetservice =
-                system.actorOf(
-                        Props.create(LocalVettingService.class),
-                        "localvetservice");
+        serviceReg = system.actorOf(Props.create(ServiceRegistry.class), "serviceReg");
+        localvetservice = system.actorOf(Props.create(LocalVettingService.class), "localVetService");
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(ClientInfo.class, msg -> {
-                    info=msg;
+                    info = msg;
                     quotations.clear();
                     client = getSender();
                     clientSequence = info.sequenceNumber;
-                    localvetservice.tell(new Messages.RequestVetService(msg),getSelf());
+                    localvetservice.tell(new Messages.RequestVetService(msg), getSelf());
                 })
-                .match(Quotation.class, msg -> {
-                    quotations.add(msg);
-                })
-                .match(Messages.NoOffer.class, msg -> {
-                    client.tell(new Messages.Offer(clientSequence + 1, quotations), getSelf());
-                })
-                .match(Messages.RespondVetService.class,msg->{
+                .match(Quotation.class, msg -> quotations.add(msg))
+                .match(Messages.NoOffer.class, msg -> client.tell(new Messages.Offer(clientSequence + 1, quotations), getSelf()))
+                .match(Messages.RespondVetService.class, msg -> {
                     if (msg.equal) {
-                        serviceReg.tell(new Messages.RequestQuotations(0,info), getSelf());
-                    }else {
+                        serviceReg.tell(new Messages.RequestQuotations(0, info), getSelf());
+                    } else {
                         client.tell(new Messages.Offer(info.sequenceNumber + 1, quotations), getSelf());
                     }
                 })

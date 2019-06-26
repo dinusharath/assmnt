@@ -28,14 +28,14 @@ public class AFQService extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Messages.RequestAQuotation.class,msg->{
+                .match(Messages.RequestAQuotation.class, msg -> {
                     clientInfo = msg.info;
                     client = getSender();
-                    sequenceNumber=msg.sequenceNumber;
-                    AbstractActor.tell(new Messages.RequestPrice(600, 600),getSelf());
+                    sequenceNumber = msg.sequenceNumber;
+                    AbstractActor.tell(new Messages.RequestPrice(600, 600), getSelf());
                 })
-                .match(Messages.RespondPrice.class,msg->{
-                    price=msg.price;
+                .match(Messages.RespondPrice.class, msg -> {
+                    price = msg.price;
                     // Automatic 30% discount for being male
                     discount = (clientInfo.sex == ClientInfo.MALE) ? 30 : 0;
 
@@ -44,22 +44,17 @@ public class AFQService extends AbstractActor {
 
                     // Add a points discount
                     discount += getPointsDiscount(clientInfo);
-                    AbstractActor.tell(new Messages.RequestReference(PREFIX),getSelf());
+                    AbstractActor.tell(new Messages.RequestReference(PREFIX), getSelf());
                 })
-                .match(Messages.RespondReference.class,msg->{
-                    client.tell(new Quotation(msg.reference, clientInfo, (price * (100 - discount)) / 100,sequenceNumber),getSelf());
+                .match(Messages.RespondReference.class, msg -> {
+                    client.tell(new Quotation(msg.reference, clientInfo, (price * (100 - discount)) / 100, sequenceNumber), getSelf());
                 })
                 .build();
     }
 
     public AFQService() {
-        system =
-                ActorSystem.create("ContentSystem");
-
-        AbstractActor =
-                system.actorOf(
-                        Props.create(AbstractQuotationService.class),
-                        "AbstractActor");
+        system = ActorSystem.create("ContentSystem");
+        AbstractActor = system.actorOf(Props.create(AbstractQuotationService.class), "AbstractActor");
     }
 
     /**
@@ -69,26 +64,6 @@ public class AFQService extends AbstractActor {
      * 20% discount for less than 3 penalty points
      * 50% penalty (i.e. reduction in discount) for more than 60 penalty points
      */
-//    @Override
-//    public Quotation generateQuotation(ClientInfo info) {
-        // Create an initial quotation between 600 and 1200
-//        double price = generatePrice(600, 600);
-//        clientInfo = info;
-//        AbstractActor.tell(new Messages.RequestPrice(600, 600),getSelf());
-//        AbstractActor.tell(new Messages.RequestReference(PREFIX),getSelf());
-
-        // Automatic 30% discount for being male
-//        int discount = (info.sex == ClientInfo.MALE) ? 30 : 0;
-
-        // Automatic 2% discount per year over 60...
-//        discount += (info.age > 60) ? (2 * (info.age - 60)) : 0;
-
-        // Add a points discount
-//        discount += getPointsDiscount(info);
-
-        // Generate the quotation and send it back
-//        return new Quotation(generateReference(PREFIX), info, (price * (100 - discount)) / 100);
-//    }
 
     private int getPointsDiscount(ClientInfo info) {
         if (info.points < 3) return 20;

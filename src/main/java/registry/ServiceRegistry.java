@@ -1,7 +1,6 @@
 package registry;
 
 import Models.Messages;
-import Models.ServiceRegistryBind;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -20,7 +19,9 @@ import java.util.Map;
 public class ServiceRegistry extends AbstractActor {
     ActorRef quationSender;
     ActorSystem system;
-int count=0;
+    ClientInfo clientInfo;
+    String[] names = new String[list().length];
+
     public ServiceRegistry() {
         system = ActorSystem.create("ContentSystem");
     }
@@ -35,33 +36,36 @@ int count=0;
         services.remove(name);
     }
 
-    private static void lookup(String name, ClientInfo clientInfo, ActorRef self,int sequenceNumber) {
-        services.get(name).tell(new Messages.RequestAQuotation(clientInfo,sequenceNumber), self);
+    private static ActorRef lookup(String name) {
+        return services.get(name);
     }
 
     private static String[] list() {
         return services.keySet().toArray(new String[services.size()]);
     }
 
-String[] names =new  String[list().length];
-    ClientInfo clientInfo;
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(ServiceRegistryBind.class, msg -> {
+                .match(Messages.ServiceRegistryBind.class, msg -> {
                     bind(msg.name, msg.service);
                     getSender().tell(new Messages.NoOffer(msg.sequenceNumber + 1), getSelf());
+                })
+                .match(Messages.ServiceRegistryRemove.class, msg -> {
+                    unbind(msg.name);
+                    getSender().tell(new Messages.NoOffer(0), getSelf());
                 })
                 .match(Messages.RequestQuotations.class, msg -> {
                     clientInfo = msg.info;
                     quationSender = getSender();
                     int i = 0;
-                    boolean shouldSend= true;
+                    boolean shouldSend = true;
                     for (String name : list()) {
-                        names[i]= name;
-                        if (name.startsWith("qs-")&& shouldSend) {
-                            lookup(name, msg.info, getSelf(),i);
-                            shouldSend=false;
+                        names[i] = name;
+                        if (name.startsWith("qs-") && shouldSend) {
+                            lookup(name).tell(new Messages.RequestAQuotation(clientInfo, i), getSelf());
+                            ;
+                            shouldSend = false;
                         }
                         i++;
 
@@ -69,10 +73,9 @@ String[] names =new  String[list().length];
                 })
                 .match(Quotation.class, msg -> {
                     quationSender.tell(msg, getSelf());
-                    if(names.length > msg.sequenceNumber+1) {
-                        lookup(names[msg.sequenceNumber + 1], clientInfo, getSelf(), msg.sequenceNumber + 1);
-                    }
-                    else {
+                    if (names.length > msg.sequenceNumber + 1) {
+                        lookup(names[msg.sequenceNumber + 1]).tell(new Messages.RequestAQuotation(clientInfo, msg.sequenceNumber + 1), getSelf());
+                    } else {
                         quationSender.tell(new Messages.NoOffer(0), getSelf());
                     }
                 })

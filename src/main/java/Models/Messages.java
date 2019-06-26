@@ -1,8 +1,8 @@
 package Models;
 
+import akka.actor.ActorRef;
 import core.ClientInfo;
 import core.Quotation;
-import core.Service;
 import quotation.QuotationService;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class Messages {
         public ClientInfo info;
         public int sequenceNumber;
 
-        public RequestAQuotation(ClientInfo info,int sequenceNumber) {
+        public RequestAQuotation(ClientInfo info, int sequenceNumber) {
             this.info = info;
             this.sequenceNumber = sequenceNumber;
 
@@ -111,4 +111,25 @@ public class Messages {
             this.price = price;
         }
     }
+
+    public static class ServiceRegistryBind {
+        public String name;
+        public ActorRef service;
+        public int sequenceNumber;
+
+        public ServiceRegistryBind(String name, ActorRef service, int sequenceNumber) {
+            this.name = name;
+            this.service = service;
+            this.sequenceNumber = sequenceNumber;
+        }
+    }
+
+    public class ServiceRegistryRemove {
+        public String name;
+
+        public ServiceRegistryRemove(String name) {
+            this.name = name;
+        }
+    }
+
 }

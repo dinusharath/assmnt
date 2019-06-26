@@ -2,7 +2,6 @@ package core;
 
 import Models.Messages;
 import akka.actor.AbstractActor;
-import quotation.QuotationService;
 
 import java.util.Random;
 
@@ -27,11 +26,8 @@ public class AbstractQuotationService extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Messages.RequestReference.class, msg -> {
-                    getSender().tell(new Messages.RespondReference(generateReference(msg.prefix)), getSelf());
-                })
-                .match(Messages.RequestPrice.class, msg -> {
-                    getSender().tell(new Messages.RespondPrice(msg.min + (double) random.nextInt(msg.range)), getSelf());
-                }).build();
+                .match(Messages.RequestReference.class, msg -> getSender().tell(new Messages.RespondReference(generateReference(msg.prefix)), getSelf()))
+                .match(Messages.RequestPrice.class, msg -> getSender().tell(new Messages.RespondPrice(generatePrice(msg.min, msg.range)), getSelf()))
+                .build();
     }
 }
