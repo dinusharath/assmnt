@@ -25,7 +25,7 @@ public class ClientForm {
             public void actionPerformed(ActionEvent e) {
                 setData();
 
-        System.out.println(client);
+                System.out.println(client);
                 JOptionPane.showMessageDialog(null, txtFieldName.getText());
             }
         });

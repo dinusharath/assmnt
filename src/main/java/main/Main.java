@@ -33,6 +33,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         Main mainObject = new Main();
         ClientInfo clientInfo = mainObject.getData();
+        System.out.println(clientInfo.name);
         ActorSystem system = ActorSystem.create("ContentSystem");
         final ActorRef broker = system.actorOf(Props.create(Broker.class));
 //        serviceRegistry.tell(new Messages.NoOffer(0),null);
@@ -59,8 +60,7 @@ public class Main {
         System.out.println("Result");
 //        ClientInfo clientInfo =new ClientInfo("Niki Collier", ClientInfo.MALE, 41, 0, 7, "PQR254/1");
 //        broker.tell(new Messages.Init(new ClientInfo("Niki Collier", ClientInfo.MALE, 41, 0, 7, "PQR254/1"),0),null);
-        broker.tell(new ClientInfo(clientInfo.name, clientInfo.sex, clientInfo.age, clientInfo.points, clientInfo.noClaims, clientInfo.licenseNumber),null);
-
+        broker.tell(new Messages.Init(new ClientInfo(clientInfo.name, clientInfo.sex, clientInfo.age, clientInfo.points, clientInfo.noClaims, clientInfo.licenseNumber),0),null);
     }
 
     /**
