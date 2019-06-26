@@ -16,23 +16,28 @@ import core.Quotation;
  */
 public class AFQService extends AbstractActor {
     // All references are to be prefixed with an AF (e.g. AF001000)
-    public static final String PREFIX = "AF";
+
+    ActorRef senderRef;
     ActorSystem system;
-    final ActorRef AbstractActor;
-    double price;
     ClientInfo clientInfo;
-    double discount;
-    ActorRef client;
+    double discount,price;
+    final ActorRef abstractActor;
     int sequenceNumber;
+    public static final String PREFIX = "AF";
+
+    public AFQService() {
+        system = ActorSystem.create("ContentSystem");
+        abstractActor = system.actorOf(Props.create(AbstractQuotationService.class), "AbstractActor");
+    }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Messages.RequestAQuotation.class, msg -> {
                     clientInfo = msg.info;
-                    client = getSender();
+                    senderRef = getSender();
                     sequenceNumber = msg.sequenceNumber;
-                    AbstractActor.tell(new Messages.RequestPrice(600, 600), getSelf());
+                    abstractActor.tell(new Messages.RequestPrice(600, 600), getSelf());
                 })
                 .match(Messages.RespondPrice.class, msg -> {
                     price = msg.price;
@@ -44,18 +49,14 @@ public class AFQService extends AbstractActor {
 
                     // Add a points discount
                     discount += getPointsDiscount(clientInfo);
-                    AbstractActor.tell(new Messages.RequestReference(PREFIX), getSelf());
+                    abstractActor.tell(new Messages.RequestReference(PREFIX), getSelf());
                 })
                 .match(Messages.RespondReference.class, msg -> {
-                    client.tell(new Quotation(msg.reference, clientInfo, (price * (100 - discount)) / 100, sequenceNumber), getSelf());
+                    senderRef.tell(new Quotation(msg.reference, clientInfo, (price * (100 - discount)) / 100, sequenceNumber), getSelf());
                 })
                 .build();
     }
 
-    public AFQService() {
-        system = ActorSystem.create("ContentSystem");
-        AbstractActor = system.actorOf(Props.create(AbstractQuotationService.class), "AbstractActor");
-    }
 
     /**
      * Quote generation:

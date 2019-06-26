@@ -14,11 +14,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Broker extends AbstractActor {
-    public ActorRef localVetService,serviceReg;
+    final ActorRef localVetService;
     ActorSystem system;
-    List<Quotation> quotations;
     ClientInfo clientInfo;
-
+    List<Quotation> quotations;
+    public ActorRef serviceReg;
 
     public Broker() {
         system = ActorSystem.create("ContentSystem");
@@ -34,8 +34,8 @@ public class Broker extends AbstractActor {
         return receiveBuilder()
                 .match(ClientInfo.class, msg -> {
                     clientInfo=msg;
-                    quotations.clear();
                     localVetService.tell(new Messages.RequestVetService(msg), getSelf());
+                    quotations.clear();
                     System.out.println("Name: " + msg.name);
                 })
                 .match(Messages.ServiceRegistryBind.class, msg -> {

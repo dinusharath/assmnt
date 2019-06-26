@@ -1,8 +1,6 @@
 package core;
-
 import Models.Messages;
 import akka.actor.AbstractActor;
-
 import java.util.Random;
 
 public class AbstractQuotationService extends AbstractActor {

@@ -67,7 +67,6 @@ public class ServiceRegistry extends AbstractActor {
                         names.add(name);
                         if (name.startsWith("qs-") && shouldSend) {
                             lookup(name).tell(new Messages.RequestAQuotation(clientInfo, i), getSelf());
-                            ;
                             shouldSend = false;
                         }
                         i++;
