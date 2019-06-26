@@ -1,6 +1,5 @@
-package test;
 
-import core.ClientInfo;
+import Models.ClientInfo;
 import main.Main;
 import org.junit.jupiter.api.Test;
 
