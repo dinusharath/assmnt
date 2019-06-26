@@ -124,7 +124,7 @@ public class Messages {
         }
     }
 
-    public class ServiceRegistryRemove {
+    public static class ServiceRegistryRemove {
         public String name;
 
         public ServiceRegistryRemove(String name) {

@@ -4,10 +4,10 @@ import akka.actor.AbstractActor;
 import java.util.Random;
 
 public class AbstractQuotationService extends AbstractActor {
-    private int counter = 1000;
-    private Random random = new Random();
+    private static int counter = 1000;
+    private static Random random = new Random();
 
-    protected String generateReference(String prefix) {
+    public static String generateReference(String prefix) {
         String ref = prefix;
         int length = 100000;
         while (length > 1000) {
@@ -17,7 +17,7 @@ public class AbstractQuotationService extends AbstractActor {
         return ref + counter++;
     }
 
-    protected double generatePrice(double min, int range) {
+    public static double generatePrice(double min, int range) {
         return min + (double) random.nextInt(range);
     }
 

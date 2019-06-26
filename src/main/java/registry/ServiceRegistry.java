@@ -7,6 +7,7 @@ import akka.actor.ActorSystem;
 import Models.ClientInfo;
 import Models.Quotation;
 import akka.actor.Props;
+import impl.Broker;
 import vetting.LocalVettingService;
 
 import java.util.*;
@@ -49,6 +50,10 @@ public class ServiceRegistry extends AbstractActor {
 
     private static String[] list() {
         return services.keySet().toArray(new String[services.size()]);
+    }
+
+    public static Props createProps() {
+        return Props.create(ServiceRegistry.class);
     }
 
     @Override

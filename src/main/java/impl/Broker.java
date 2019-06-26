@@ -16,7 +16,7 @@ public class Broker extends AbstractActor {
     ActorSystem system;
     ClientInfo clientInfo;
     List<Quotation> quotations;
-    public ActorRef serviceReg;
+    ActorRef serviceReg, senderRef;
 
     public Broker() {
         system = ActorSystem.create("ContentSystem");
@@ -26,12 +26,17 @@ public class Broker extends AbstractActor {
 
     }
 
+    public static Props createProps() {
+        return Props.create(Broker.class);
+    }
+
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Messages.Init.class, msg -> {
                     clientInfo = msg.clientInfo;
                     quotations.clear();
+                    senderRef = getSender();
                     serviceReg.tell(new Messages.RequestQuotations(msg.sequenceNumber, clientInfo), getSelf());
                     System.out.println("Name: " + msg.clientInfo.name);
                 })
@@ -43,6 +48,7 @@ public class Broker extends AbstractActor {
                     for (Quotation quotation : msg.quotation) {
                         System.out.println("Reference: " + quotation.reference + " / Price: " + quotation.price);
                     }
+                    senderRef.tell(msg, getSelf());
                 })
                 .match(Messages.NoOffer.class, msg -> {
                     System.out.println("Sorry no quotations qualified for you");
