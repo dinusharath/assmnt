@@ -14,7 +14,25 @@ import vetting.LocalVettingService;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
+    public ClientInfo client = new ClientInfo();
+
+    public void setData(String name, char gender, int age, int points, int noClaims, String licenseNumber) {
+        this.client.name = name;
+        this.client.sex = gender;
+        this.client.age = age;
+        this.client.points = points;
+        this.client.noClaims = noClaims;
+        this.client.licenseNumber = licenseNumber;
+
+        System.out.println(client);
+    }
+
+    public ClientInfo getData(){
+        return client;
+    }
     public static void main(String[] args) throws InterruptedException {
+        Main mainObject = new Main();
+        ClientInfo clientInfo = mainObject.getData();
         ActorSystem system = ActorSystem.create("ContentSystem");
         final ActorRef broker = system.actorOf(Props.create(Broker.class));
 //        serviceRegistry.tell(new Messages.NoOffer(0),null);
@@ -39,8 +57,10 @@ public class Main {
         System.out.println(".");
         TimeUnit.SECONDS.sleep(1);
         System.out.println("Result");
-        ClientInfo clientInfo =new ClientInfo("Niki Collier", ClientInfo.MALE, 41, 0, 7, "PQR254/1");
-        broker.tell(new Messages.Init(new ClientInfo("Niki Collier", ClientInfo.MALE, 41, 0, 7, "PQR254/1"),0),null);
+//        ClientInfo clientInfo =new ClientInfo("Niki Collier", ClientInfo.MALE, 41, 0, 7, "PQR254/1");
+//        broker.tell(new Messages.Init(new ClientInfo("Niki Collier", ClientInfo.MALE, 41, 0, 7, "PQR254/1"),0),null);
+        broker.tell(new ClientInfo(clientInfo.name, clientInfo.sex, clientInfo.age, clientInfo.points, clientInfo.noClaims, clientInfo.licenseNumber),null);
+
     }
 
     /**
