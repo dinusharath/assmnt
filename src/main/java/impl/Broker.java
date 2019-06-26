@@ -7,7 +7,11 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import Models.ClientInfo;
 import Models.Quotation;
+import quotation.AFQService;
+import quotation.DDQService;
+import quotation.GPQService;
 import registry.ServiceRegistry;
+import vetting.LocalVettingService;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +26,16 @@ public class Broker extends AbstractActor {
         system = ActorSystem.create("ContentSystem");
         quotations = new LinkedList<Quotation>();
         serviceReg = system.actorOf(Props.create(ServiceRegistry.class), "serviceReg");
+        Messages.ServiceRegistryBind[] services = new Messages.ServiceRegistryBind[4];
 
+        services[0] = new Messages.ServiceRegistryBind("qs-GirlPowerService",system.actorOf(Props.create(GPQService.class), "GPQService"), 0);
+        services[1] = new Messages.ServiceRegistryBind("qs-AuldFellasService", system.actorOf(Props.create( AFQService.class), "AFQService"), 1);
+        services[2] = new Messages.ServiceRegistryBind("qs-DodgyDriversService", system.actorOf(Props.create( DDQService.class), "DDQService"), 2);
+        services[3] = new Messages.ServiceRegistryBind("vs-VettingService", system.actorOf(Props.create( LocalVettingService.class), "LVQService"), 3);
+        serviceReg.tell(services[0], getSelf());
+        serviceReg.tell(services[1], getSelf());
+        serviceReg.tell(services[2], getSelf());
+        serviceReg.tell(services[3], getSelf());
 
     }
 

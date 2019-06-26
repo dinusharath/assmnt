@@ -17,17 +17,6 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         ActorSystem system = ActorSystem.create("ContentSystem");
         final ActorRef broker = system.actorOf(Props.create(Broker.class));
-//        serviceRegistry.tell(new Messages.NoOffer(0),null);
-        Messages.ServiceRegistryBind[] services = new Messages.ServiceRegistryBind[4];
-
-        services[0] = new Messages.ServiceRegistryBind("qs-GirlPowerService",system.actorOf(Props.create(GPQService.class), "GPQService"), 0);
-        services[1] = new Messages.ServiceRegistryBind("qs-AuldFellasService", system.actorOf(Props.create( AFQService.class), "AFQService"), 1);
-        services[2] = new Messages.ServiceRegistryBind("qs-DodgyDriversService", system.actorOf(Props.create( DDQService.class), "DDQService"), 2);
-        services[3] = new Messages.ServiceRegistryBind("vs-VettingService", system.actorOf(Props.create( LocalVettingService.class), "LVQService"), 3);
-        broker.tell(services[0],null);
-        broker.tell(services[1],null);
-        broker.tell(services[2],null);
-        broker.tell(services[3],null);
         System.out.print("Wait.");
         TimeUnit.SECONDS.sleep(1);
         System.out.print(".");
