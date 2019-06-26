@@ -12,14 +12,13 @@ public class ClientInfo {
 	public static final char MALE				= 'M';
 	public static final char FEMALE				= 'F';
 	
-	public ClientInfo(String name, char sex, int age, int points, int noClaims, String licenseNumber,int sequenceNumber) {
+	public ClientInfo(String name, char sex, int age, int points, int noClaims, String licenseNumber) {
 		this.name = name;
 		this.sex = sex;
 		this.age = age;
 		this.points = points;
 		this.noClaims = noClaims;
 		this.licenseNumber = licenseNumber;
-		this.sequenceNumber=sequenceNumber;
 	}
 	
 	public ClientInfo() {}
@@ -35,6 +34,5 @@ public class ClientInfo {
 	public int points;
 	public int noClaims;
 	public String licenseNumber;
-	public int sequenceNumber;
 
 }

@@ -7,7 +7,9 @@ import akka.actor.ActorSystem;
 import core.ClientInfo;
 import core.Quotation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,10 +22,11 @@ public class ServiceRegistry extends AbstractActor {
     ActorRef quationSender;
     ActorSystem system;
     ClientInfo clientInfo;
-    String[] names = new String[list().length];
+    List names;
 
     public ServiceRegistry() {
         system = ActorSystem.create("ContentSystem");
+        names = new ArrayList();
     }
 
     private static Map<String, ActorRef> services = new HashMap<String, ActorRef>();
@@ -61,7 +64,7 @@ public class ServiceRegistry extends AbstractActor {
                     int i = 0;
                     boolean shouldSend = true;
                     for (String name : list()) {
-                        names[i] = name;
+                        names.add(name);
                         if (name.startsWith("qs-") && shouldSend) {
                             lookup(name).tell(new Messages.RequestAQuotation(clientInfo, i), getSelf());
                             ;
@@ -73,8 +76,8 @@ public class ServiceRegistry extends AbstractActor {
                 })
                 .match(Quotation.class, msg -> {
                     quationSender.tell(msg, getSelf());
-                    if (names.length > msg.sequenceNumber + 1) {
-                        lookup(names[msg.sequenceNumber + 1]).tell(new Messages.RequestAQuotation(clientInfo, msg.sequenceNumber + 1), getSelf());
+                    if (names.size() > msg.sequenceNumber + 1) {
+                        lookup((String) names.get(msg.sequenceNumber + 1)).tell(new Messages.RequestAQuotation(clientInfo, msg.sequenceNumber + 1), getSelf());
                     } else {
                         quationSender.tell(new Messages.NoOffer(0), getSelf());
                     }
