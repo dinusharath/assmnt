@@ -1,4 +1,4 @@
-package core;
+package Models;
 
 /**
  * Interface to define the data to be stored in Quotation objects.

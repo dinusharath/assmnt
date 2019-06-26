@@ -5,16 +5,14 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import core.ClientInfo;
-import core.Quotation;
+import Models.ClientInfo;
+import Models.Quotation;
 import registry.ServiceRegistry;
-import vetting.LocalVettingService;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class Broker extends AbstractActor {
-    final ActorRef localVetService;
     ActorSystem system;
     ClientInfo clientInfo;
     List<Quotation> quotations;
@@ -22,7 +20,6 @@ public class Broker extends AbstractActor {
 
     public Broker() {
         system = ActorSystem.create("ContentSystem");
-        localVetService = system.actorOf(Props.create(LocalVettingService.class), "localVetService");
         quotations = new LinkedList<Quotation>();
         serviceReg = system.actorOf(Props.create(ServiceRegistry.class), "serviceReg");
 
@@ -32,27 +29,23 @@ public class Broker extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(ClientInfo.class, msg -> {
-                    clientInfo=msg;
-                    localVetService.tell(new Messages.RequestVetService(msg), getSelf());
+                .match(Messages.Init.class, msg -> {
+                    clientInfo = msg.clientInfo;
                     quotations.clear();
-                    System.out.println("Name: " + msg.name);
+                    serviceReg.tell(new Messages.RequestQuotations(msg.sequenceNumber, clientInfo), getSelf());
+                    System.out.println("Name: " + msg.clientInfo.name);
                 })
                 .match(Messages.ServiceRegistryBind.class, msg -> {
                     serviceReg.tell(msg, getSelf());
                 })
                 .match(Quotation.class, msg -> quotations.add(msg))
-                .match(Messages.NoOffer.class, msg ->{
-                    for(Quotation quotation :quotations){
+                .match(Messages.Offer.class, msg -> {
+                    for (Quotation quotation : msg.quotation) {
                         System.out.println("Reference: " + quotation.reference + " / Price: " + quotation.price);
                     }
                 })
-                .match(Messages.RespondVetService.class, msg -> {
-                    if (msg.equal) {
-                        serviceReg.tell(new Messages.RequestQuotations(0, clientInfo), getSelf());
-                    } else {
-                        System.out.println("Sorry no quotations qualified for you");
-                    }
+                .match(Messages.NoOffer.class, msg -> {
+                    System.out.println("Sorry no quotations qualified for you");
                 })
                 .build();
     }

@@ -4,7 +4,7 @@ import Models.Messages;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import core.ClientInfo;
+import Models.ClientInfo;
 import impl.Broker;
 import quotation.AFQService;
 import quotation.DDQService;
@@ -39,7 +39,8 @@ public class Main {
         System.out.println(".");
         TimeUnit.SECONDS.sleep(1);
         System.out.println("Result");
-        broker.tell(new ClientInfo("Niki Collier", ClientInfo.MALE, 41, 0, 7, "PQR254/1"),null);
+        ClientInfo clientInfo =new ClientInfo("Niki Collier", ClientInfo.MALE, 41, 0, 7, "PQR254/1");
+        broker.tell(new Messages.Init(new ClientInfo("Niki Collier", ClientInfo.MALE, 41, 0, 7, "PQR254/1"),0),null);
     }
 
     /**

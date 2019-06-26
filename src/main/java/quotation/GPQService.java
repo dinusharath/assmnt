@@ -6,8 +6,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import core.AbstractQuotationService;
-import core.ClientInfo;
-import core.Quotation;
+import Models.ClientInfo;
+import Models.Quotation;
 
 /**
  * Implementation of the Girl Power insurance quotation service.

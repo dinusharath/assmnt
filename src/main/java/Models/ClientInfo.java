@@ -1,6 +1,5 @@
-package core;
+package Models;
 
-import com.sun.istack.internal.Nullable;
 
 /**
  * Interface to define the state to be stored in ClientInfo objects

@@ -1,8 +1,7 @@
 package quotation;
 
-import core.ClientInfo;
-import core.Quotation;
-import core.Service;
+import Models.ClientInfo;
+import Models.Quotation;
 
 /**
  * Interface to define the behaviour of a quotation service.

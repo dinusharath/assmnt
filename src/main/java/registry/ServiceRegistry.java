@@ -4,13 +4,12 @@ import Models.Messages;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import core.ClientInfo;
-import core.Quotation;
+import Models.ClientInfo;
+import Models.Quotation;
+import akka.actor.Props;
+import vetting.LocalVettingService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This is a basic service registry implementation that is based on the registry used in
@@ -22,11 +21,16 @@ public class ServiceRegistry extends AbstractActor {
     ActorRef quationSender;
     ActorSystem system;
     ClientInfo clientInfo;
+    final ActorRef localVetService;
+    int sequenceNumber;
     List names;
+    List<Quotation> quotations;
 
     public ServiceRegistry() {
         system = ActorSystem.create("ContentSystem");
         names = new ArrayList();
+        quotations = new LinkedList<Quotation>();
+        localVetService = system.actorOf(Props.create(LocalVettingService.class), "localVetService");
     }
 
     private static Map<String, ActorRef> services = new HashMap<String, ActorRef>();
@@ -52,33 +56,39 @@ public class ServiceRegistry extends AbstractActor {
         return receiveBuilder()
                 .match(Messages.ServiceRegistryBind.class, msg -> {
                     bind(msg.name, msg.service);
-                    getSender().tell(new Messages.NoOffer(msg.sequenceNumber + 1), getSelf());
                 })
                 .match(Messages.ServiceRegistryRemove.class, msg -> {
                     unbind(msg.name);
-                    getSender().tell(new Messages.NoOffer(0), getSelf());
                 })
                 .match(Messages.RequestQuotations.class, msg -> {
                     clientInfo = msg.info;
                     quationSender = getSender();
-                    int i = 0;
-                    boolean shouldSend = true;
-                    for (String name : list()) {
-                        names.add(name);
-                        if (name.startsWith("qs-") && shouldSend) {
-                            lookup(name).tell(new Messages.RequestAQuotation(clientInfo, i), getSelf());
-                            shouldSend = false;
-                        }
-                        i++;
-
-                    }
+                    sequenceNumber = msg.sequenceNumber;
+                    quotations.clear();
+                    localVetService.tell(new Messages.RequestVetService(msg.info), getSelf());
                 })
                 .match(Quotation.class, msg -> {
-                    quationSender.tell(msg, getSelf());
+                    quotations.add(msg);
                     if (names.size() > msg.sequenceNumber + 1) {
                         lookup((String) names.get(msg.sequenceNumber + 1)).tell(new Messages.RequestAQuotation(clientInfo, msg.sequenceNumber + 1), getSelf());
                     } else {
-                        quationSender.tell(new Messages.NoOffer(0), getSelf());
+                        quationSender.tell(new Messages.Offer(sequenceNumber, quotations), getSelf());
+                    }
+                })
+                .match(Messages.RespondVetService.class, msg -> {
+                    if (msg.equal) {
+                        int i = 0;
+                        boolean shouldSend = true;
+                        for (String name : list()) {
+                            names.add(name);
+                            if (name.startsWith("qs-") && shouldSend) {
+                                lookup(name).tell(new Messages.RequestAQuotation(clientInfo, i), getSelf());
+                                shouldSend = false;
+                            }
+                            i++;
+                        }
+                    } else {
+                        quationSender.tell(new Messages.NoOffer(sequenceNumber), getSelf());
                     }
                 })
                 .build();

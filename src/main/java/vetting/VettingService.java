@@ -1,7 +1,7 @@
 package vetting;
 
-import core.ClientInfo;
-import core.Service;
+import Models.ClientInfo;
+import quotation.Service;
 
 /**
  * Interface defining the expected behavour of a vetting service.

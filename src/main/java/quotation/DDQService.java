@@ -5,8 +5,8 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import core.AbstractQuotationService;
-import core.ClientInfo;
-import core.Quotation;
+import Models.ClientInfo;
+import Models.Quotation;
 import akka.actor.Props;
 
 

@@ -2,7 +2,7 @@ package vetting;
 
 import Models.Messages;
 import akka.actor.AbstractActor;
-import core.ClientInfo;
+import Models.ClientInfo;
 
 import java.util.HashMap;
 import java.util.Map;

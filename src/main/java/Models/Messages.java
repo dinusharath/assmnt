@@ -1,18 +1,18 @@
 package Models;
 
 import akka.actor.ActorRef;
-import core.ClientInfo;
-import core.Quotation;
-import quotation.QuotationService;
 
 import java.util.List;
 
 public class Messages {
-    class Init {
-        public QuotationService service;
 
-        public Init(QuotationService service) {
-            this.service = service;
+   public static class Init {
+        public ClientInfo clientInfo;
+        public int sequenceNumber;
+
+        public Init(ClientInfo clientInfo, int sequenceNumber) {
+            this.clientInfo = clientInfo;
+            this.sequenceNumber = sequenceNumber;
         }
     }
 

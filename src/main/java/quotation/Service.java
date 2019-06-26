@@ -1,4 +1,4 @@
-package core;
+package quotation;
 
 public interface Service {
 
